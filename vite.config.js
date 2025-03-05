@@ -5,6 +5,6 @@ export default defineConfig({
   plugins: [react()],
   base: '/', // Use '/' for Netlify or a custom path if deploying to a subdirectory
   build: {
-    outDir: 'dist', // Make sure the output directory is 'dist'
+    outDir: 'build', // Change the output directory to 'build'
   },
 });
