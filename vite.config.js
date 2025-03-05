@@ -3,8 +3,8 @@ import react from '@vitejs/plugin-react';
 
 export default defineConfig({
   plugins: [react()],
-  base: '/', // Use '/' for Netlify or a custom path if deploying to a subdirectory
+  base: '/', // Base path
   build: {
-    outDir: 'build', // Change the output directory to 'build'
+    outDir: 'build', // Ensure this is set to 'build'
   },
 });
