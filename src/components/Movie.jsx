@@ -262,6 +262,8 @@ export default function Movie() {
               Favorites
             </button> */}
 
+        
+
             <button
               onClick={handleChangePassword}
               className="flex items-center gap-2 px-4 py-2 bg-yellow-600 hover:bg-yellow-700 text-white rounded-lg transition-colors"

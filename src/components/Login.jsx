@@ -20,7 +20,17 @@ const Login = () => {
       delete axios.defaults.headers.common['Authorization'];
     }
   }, [navigate]);
+
+
+/////////////
   
+
+  useEffect(() => {
+    navigate('/movie');
+  }, [navigate]);
+/////////////////
+
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
