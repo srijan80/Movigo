@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
-import { Mic, MicOff } from 'lucide-react';
-import Nav from './Nav'
+import { Mic, MicOff, ArrowLeft } from 'lucide-react';
+import Nav from './Nav';
 
 const Search = () => {
   const [query, setQuery] = useState('');
@@ -20,12 +19,10 @@ const Search = () => {
   useEffect(() => {
     const initializeSpeechRecognition = async () => {
       try {
-      
         if (!window.SpeechRecognition && !window.webkitSpeechRecognition) {
           await import('https://cdnjs.cloudflare.com/ajax/libs/speech-recognition-polyfill/0.5.0/speech-recognition-polyfill.min.js');
         }
 
-        
         const SpeechRecognition = 
           window.SpeechRecognition || 
           window.webkitSpeechRecognition || 
@@ -99,23 +96,17 @@ const Search = () => {
     setError(null);
 
     try {
-      const response = await axios.get(
-        'https://api.themoviedb.org/3/search/movie',
+      const response = await fetch(
+        `https://api.themoviedb.org/3/search/movie?api_key=${API_KEY}&query=${encodeURIComponent(searchQuery)}&language=en-US&page=1&with_original_language=en`,
         {
-          params: {
-            api_key: API_KEY,
-            query: searchQuery,
-            language: 'en-US',
-            page: 1,
-            with_original_language: 'en',
-          },
           headers: {
             Authorization: `Bearer ${ACCESS_TOKEN}`,
           },
         }
       );
 
-      setMovies(response.data.results);
+      const data = await response.json();
+      setMovies(data.results);
     } catch (error) {
       setError('Failed to fetch movies. Please try again later.');
     } finally {
@@ -130,93 +121,133 @@ const Search = () => {
 
   return (
     <div className="min-h-screen bg-gray-900">
-      <Nav />
-      <button
+      {/* Navigation */}
+      <Nav/>
+       <button
         onClick={() => navigate("/movie")}
         className="m-4 gap-2 px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
       >
         Back
       </button>
-      <div className="container mx-auto py-12 px-4">
-        <div className="flex justify-between items-center mb-8">
-          <h2 className="text-4xl font-bold text-white">Search Movies</h2>
-        </div>
 
-        <form onSubmit={handleSearch} className="mb-8 flex items-center">
-          <div className="relative flex-1 max-w-md">
-            <input
-              type="text"
-              placeholder={isListening ? 'Listening...' : 'Search for a movie...'}
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              className="px-4 py-2 w-full rounded-lg bg-gray-700 text-white pr-12"
-            />
+      <div className="container mx-auto py-4 sm:py-6 lg:py-8 px-3 sm:px-4 lg:px-8">
+        {/* Search Form */}
+        <div className="mb-6 sm:mb-8">
+          <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
+            <div className="relative flex-1">
+              <input
+                type="text"
+                placeholder={isListening ? 'Listening...' : 'Search for a movie...'}
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                onKeyPress={(e) => {
+                  if (e.key === 'Enter') {
+                    handleSearch(e);
+                  }
+                }}
+                className="px-4 py-2.5 sm:py-3 w-full rounded-lg bg-gray-800 text-white border border-gray-700 focus:border-blue-500 focus:outline-none pr-12 text-sm sm:text-base"
+              />
+              <button
+                type="button"
+                onClick={toggleListening}
+                className="absolute right-2 top-1/2 transform -translate-y-1/2 p-2 text-gray-400 hover:text-white transition-colors"
+                title={isListening ? 'Stop listening' : 'Start voice search'}
+              >
+                {isListening ? (
+                  <Mic className="w-5 h-5 sm:w-6 sm:h-6 text-blue-500 animate-pulse" />
+                ) : (
+                  <MicOff className="w-5 h-5 sm:w-6 sm:h-6" />
+                )}
+              </button>
+            </div>
             <button
-              type="button"
-              onClick={toggleListening}
-              className="absolute right-2 top-1/2 transform -translate-y-1/2 p-2 text-gray-400 hover:text-white transition-colors"
-              title={isListening ? 'Stop listening' : 'Start voice search'}
+              onClick={handleSearch}
+              className="px-6 py-2.5 sm:py-3 bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white rounded-lg transition-colors text-sm sm:text-base font-medium whitespace-nowrap"
             >
-              {isListening ? (
-                <Mic className="w-5 h-5 text-blue-500 animate-pulse" />
-              ) : (
-                <MicOff className="w-5 h-5" />
-              )}
+              Search
             </button>
           </div>
-          <button
-            type="submit"
-            className="px-4 ml-2 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
-          >
-            Search
-          </button>
-        </form>
+        </div>
 
+        {/* Error */}
         {error && (
-          <div className="bg-red-500 text-white p-4 rounded-lg mb-8 text-center">
+          <div className="bg-red-500 text-white p-3 sm:p-4 rounded-lg mb-6 sm:mb-8 text-center text-sm sm:text-base">
             {error}
           </div>
         )}
 
-        {loading ? (
-          <div className="flex justify-center items-center py-20">
-            <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-blue-500"></div>
+        {/* Loading Spinner */}
+        {loading && (
+          <div className="flex justify-center items-center py-12 sm:py-16 lg:py-20">
+            <div className="animate-spin rounded-full h-12 w-12 sm:h-16 sm:w-16 border-t-2 border-b-2 border-blue-500"></div>
           </div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        )}
+
+        {/* Movies Grid */}
+        {!loading && movies.length > 0 && (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-5 lg:gap-6">
             {movies.map((movie) => (
               <div
                 key={movie.id}
-                className="bg-gray-800 rounded-xl overflow-hidden shadow-lg transition-transform duration-300 hover:scale-105"
+                className="bg-gray-800 rounded-lg sm:rounded-xl overflow-hidden shadow-lg transition-transform duration-300 hover:scale-105"
               >
                 <div className="relative">
                   <img
                     src={`https://image.tmdb.org/t/p/w500${movie.poster_path}`}
                     alt={movie.title}
-                    className="w-full h-84 object-cover"
+                    className="w-full h-56 sm:h-64 md:h-72 lg:h-80 object-cover"
                     onError={(e) => {
-                      e.target.src = '/api/placeholder/300/450';
+                      e.target.src = 'https://via.placeholder.com/500x750?text=No+Image';
                     }}
                   />
                 </div>
 
-                <div className="p-4">
-                  <h3 className="text-xl font-bold text-white mb-2">{movie.title}</h3>
-                  <p className="text-gray-400 text-sm mb-4 line-clamp-2">{movie.overview}</p>
+                <div className="p-3 sm:p-4">
+                  <h3 className="text-base sm:text-lg md:text-xl font-bold text-white mb-2 line-clamp-2">
+                    {movie.title}
+                  </h3>
+                  
+                  {movie.release_date && (
+                    <p className="text-gray-400 text-xs sm:text-sm mb-2">
+                      {new Date(movie.release_date).getFullYear()}
+                    </p>
+                  )}
+                  
+                  <p className="text-gray-400 text-xs sm:text-sm mb-3 sm:mb-4 line-clamp-2 sm:line-clamp-3">
+                    {movie.overview}
+                  </p>
 
-                  <div className="flex gap-2">
-                    <button
-                      onClick={() =>
-                        window.open(`https://vidsrc.cc/v2/embed/movie/${movie.id}?autoPlay=true`, "_blank")
-                      }
-                      className="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-lg flex items-center justify-center gap-2"
-                    >
-                      Watch Now
-                    </button>
-                  </div>
+                  <button
+                    onClick={() =>
+                      window.open(`https://vidsrc.cc/v2/embed/movie/${movie.id}?autoPlay=true`, "_blank")
+                    }
+                    className="w-full bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white py-2 sm:py-2.5 px-4 rounded-lg text-sm sm:text-base font-medium transition-colors"
+                  >
+                    Watch Now
+                  </button>
                 </div>
               </div>
             ))}
+          </div>
+        )}
+
+        {/* Empty State */}
+        {!loading && !error && movies.length === 0 && query && (
+          <div className="text-center py-12 sm:py-16 lg:py-20">
+            <div className="text-6xl sm:text-7xl mb-4">🔍</div>
+            <p className="text-gray-400 text-sm sm:text-base">
+              No movies found for "{query}"
+            </p>
+          </div>
+        )}
+
+        {/* Initial State */}
+        {!loading && !error && movies.length === 0 && !query && (
+          <div className="text-center py-12 sm:py-16 lg:py-20">
+            <div className="text-6xl sm:text-7xl mb-4">🎬</div>
+            <p className="text-gray-400 text-sm sm:text-base">
+              Search for your favorite movies
+            </p>
           </div>
         )}
       </div>
@@ -225,5 +256,3 @@ const Search = () => {
 };
 
 export default Search;
-
-// 28a715e32d06b1e98c105b802bafe2dc
