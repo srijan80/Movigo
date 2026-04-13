@@ -3,7 +3,7 @@ import ReactDOM from 'react-dom/client';
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import './index.css';
 import App from './App';
-// import Login from './components/Login';
+import Login from './components/Login';
 import MoviePage from './components/Movie'; 
 import ProtectedRoute from './components/ProtectedRoute';  
 import Fav from './components/Fav';
@@ -20,7 +20,7 @@ root.render(
   <React.StrictMode>
     <BrowserRouter>
       <Routes>
-        {/* <Route path="/" element={<Login />} /> */}
+        <Route path="/" element={<Login />} />
         <Route path="/Search" element={<Search />} />
         <Route path="/Favorites" element={<Fav />} />
         <Route path="/Music" element={<Music />} />
